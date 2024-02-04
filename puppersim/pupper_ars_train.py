@@ -21,7 +21,7 @@ import socket
 from arspb.shared_noise import *
 
 ##############################
-#temp hack to create an envs_v2 pupper env
+# temp hack to create an envs_v2 pupper env
 
 import os
 import puppersim
@@ -29,19 +29,28 @@ import gin
 from pybullet_envs.minitaur.envs_v2 import env_loader
 import puppersim.data as pd
 
-def create_pupper_env():
+import pybullet as p
+
+# state points below:
+x1 = 2
+y1 = 5
+x2 = 0.5
+y2 = -2
+
+def create_pupper_env(): # Function for creating the pupper environment
   CONFIG_DIR = puppersim.getPupperSimPath()
   _CONFIG_FILE = os.path.join(CONFIG_DIR, "config", "pupper_pmtg.gin")
 #  _NUM_STEPS = 10000
 #  _ENV_RANDOM_SEED = 2 
-   
+  
   gin.bind_parameter("scene_base.SceneBase.data_root", pd.getDataPath()+"/")
   gin.parse_config_file(_CONFIG_FILE)
   env = env_loader.load()
+  p.setAdditionalSearchPath(pd.getDataPath())
+  p.loadURDF("cone.urdf",[1,2,0.0]) # load in a cone
+  
   return env
   
-  
-##############################
 
 @ray.remote
 class Worker(object):

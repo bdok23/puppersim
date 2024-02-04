@@ -95,11 +95,11 @@ class Worker(object):
       total_steps = 0
 
       # HARD CODED TARGETS
-      # targets = []
-      # targets.append(np.array([0.07, 0.07, 0.07]))
-      # targets.append(np.array([0.07, -0.07, 0.07]))
-      # targets.append(np.array([-0.07, 0.07, 0.07]))
-      # targets.append(np.array([-0.07, -0.07, 0.07]))
+      targets = []
+      targets.append(np.array([0.07, 0.07, 0.07]))
+      targets.append(np.array([0.07, -0.07, 0.07]))
+      targets.append(np.array([-0.07, 0.07, 0.07]))
+      targets.append(np.array([-0.07, -0.07, 0.07]))
       
       # Random targets
       np.random.seed(0)

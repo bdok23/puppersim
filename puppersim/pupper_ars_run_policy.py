@@ -28,8 +28,13 @@ import gin
 from pybullet_envs.minitaur.envs_v2 import env_loader
 from pybullet import COV_ENABLE_GUI
 import puppersim.data as pd
+import pybullet as p
 
-
+# state points below:
+x1 = 2
+y1 = 5
+x2 = 0.5
+y2 = -2
 
 
 def create_pupper_env(args):
@@ -43,6 +48,8 @@ def create_pupper_env(args):
   gin.bind_parameter("SimulationParameters.enable_rendering", args.render)
   env = env_loader.load()
   env._pybullet_client.configureDebugVisualizer(COV_ENABLE_GUI, 0)
+  p.setAdditionalSearchPath(pd.getDataPath())
+  p.loadURDF("cone.urdf",[1,2,0.0]) # cone loaded at (1, 2) or something
   
   return env
 

@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
+import math
 
 import gin
 from pybullet_envs.minitaur.envs_v2.tasks import task_interface
@@ -57,6 +58,7 @@ class SimpleForwardTask(task_interface.Task):
     self._torque_penalty_coef = torque_penalty_coef
     self._env = None
     self._step_count = 0
+    
     if energy_penalty_coef < 0:
       raise ValueError("Energy Penalty Coefficient should be >= 0")
 
@@ -81,15 +83,24 @@ class SimpleForwardTask(task_interface.Task):
     del env
     self._last_base_position = env_utils.get_robot_base_position(
         self._env.robot)
+ 
 
   def reward(self, env):
+    # BERKAN CODE
+    # state points below:
+    x = [0.5, 0.5]
+    y = [-0.5, -2]
+    current = 0
+    states = [(0.5, -0.5), (0.5, -2)]
+    ############################################################
+
     """Get the reward without side effects."""
     del env
 
     self._step_count += 1
     env = self._env
     current_base_position = env_utils.get_robot_base_position(self._env.robot)
-    velocity = -(current_base_position[1] - self._last_base_position[1])#negative Y axis
+    velocity = -(current_base_position[1] - self._last_base_position[1]) # negative Y axis
     if self._divide_with_dt:
       velocity /= env.env_time_step
     if self._clip_velocity is not None:
@@ -111,24 +122,69 @@ class SimpleForwardTask(task_interface.Task):
     reward -= action_acceleration_penalty
 
     # Energy
-    if self._energy_penalty_coef > 0:
+    if self._energy_penalty_coef > 0: # penalize spent energy
       energy_reward = -task_utils.calculate_estimated_energy_consumption(
           self._env.robot.motor_torques, self._env.robot.motor_velocities,
           self._env.sim_time_step, self._env.num_action_repeat)
       reward += energy_reward * self._energy_penalty_coef
 
-    if self._torque_penalty_coef > 0:
+    if self._torque_penalty_coef > 0: # penalize torque
       torque_reward = -self._torque_penalty_coef * np.dot(
           self._env.robot.motor_torques, self._env.robot.motor_torques)
       reward += torque_reward
 
+    # ANTHONY CODE BELOW
+    currVector = [1-current_base_position[0], 2-current_base_position[1], 0-current_base_position[2]]
+    velVector = [current_base_position[0]-self._last_base_position[0], current_base_position[1]-self._last_base_position[1], current_base_position[2]-self._last_base_position[2]]
+    angle_reward = 0.0004*(abs(math.pi-task_utils.turn_angle(currVector, velVector)))
+    dist_reward = 0.0003*abs(task_utils.calculate_distance([1,2,0.0], current_base_position))
+    reward -= dist_reward
+    reward += angle_reward
+    stor = abs(task_utils.calculate_distance([1,2,0.0], current_base_position))
+  
+    if stor < 0.6:
+      if stor < 0.25:
+        reward += 100
+      reward += 200
+    
+    return reward * self._weight
+    #################################################
+  
+    # JADEN CODE BELOW
     # print("Reward.", "Timestamp:", round(env.robot.GetTimeSinceReset(), 3),
     #       "Velocity:", round(velocity, 4), "Torque:", round(torque_reward, 4))
-    return reward * self._weight
+    ############################
+    # CLEMENT CODE
+    # dist_reward = 1/abs(task_utils.calculate_distance([2,5,0.0], current_base_position))
+    # reward = dist_reward
+    ##################################    
+    # BERKAN CODE
+    # imDone = False
+
+    # if(abs(task_utils.calculate_distance([0.5,-0.5,0.0],current_base_position)) < 0.15):
+    #   imDone = True
+    #  print(imDone)
+
+    # if(imDone):
+    #  reward = -velocity/50
+    # else:
+    #  reward = velocity/50
+    # print(reward*1000)
+    # current += 1
+    # reward = 1/abs(task_utils.calculate_distance([states[current][0],states[current][1],0.0],current_base_position))
+    # print(velocity)
+    # print(reward * self._weight)
+    ########################################
+  
+
+
 
   def done(self, env):
     del env
     position = env_utils.get_robot_base_position(self._env.robot)
+    stor = abs(task_utils.calculate_distance([1,2,0.0], position))
+    if stor < 0.25:
+      return True
     if self._min_com_height and position[2] < self._min_com_height:
       return True
     return self._terminal_condition(self._env)

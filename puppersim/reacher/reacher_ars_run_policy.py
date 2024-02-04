@@ -126,11 +126,12 @@ def main(argv):
   try: #for i in range(args.num_rollouts):
     while(True):
       # Hard coded targets
-      # possible_targets = []
-      # possible_targets.append(np.array([0.07, 0.07, 0.07]))
-      # possible_targets.append(np.array([0.07, -0.07, 0.07]))
-      # possible_targets.append(np.array([-0.07, 0.07, 0.07]))
-      # possible_targets.append(np.array([-0.07, -0.07, 0.07]))
+      possible_targets = []
+      # possible_targets.append([0.1, 0.1, 0.1])
+      possible_targets.append(np.array([0.07, 0.07, 0.07]))
+      possible_targets.append(np.array([0.07, -0.07, 0.07]))
+      possible_targets.append(np.array([-0.07, 0.07, 0.07]))
+      possible_targets.append(np.array([-0.07, -0.07, 0.07]))
 
       # Random targets
       np.random.seed(0)
